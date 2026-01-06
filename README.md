@@ -15,6 +15,10 @@ The project follows a standard Python package structure:
 - `results/`: Experiment outputs
 - `notebooks/`: Analysis notebooks
 
+## 🎥 Output Example
+We included a sample generated Deepfake in `examples/`.
+<video src="examples/deepfake_demo.mp4" controls title="Deepfake Demo"></video>
+
 ## Installation
 
 ### Prerequisites
