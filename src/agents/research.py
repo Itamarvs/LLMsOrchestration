@@ -12,6 +12,18 @@ except ImportError:
     # Fallback for when running tests not from root
     pass
 
+import google.generativeai as genai
+from dotenv import load_dotenv
+import PIL.Image
+
+# Load environment variables
+load_dotenv()
+
+# Configure Gemini
+api_key = os.getenv("GEMINI_API_KEY")
+if api_key:
+    genai.configure(api_key=api_key)
+
 class ResearchAgent(Agent):
     def __init__(self):
         super().__init__(name="SciBot", role="Research & Analysis")
@@ -26,45 +38,70 @@ class ResearchAgent(Agent):
 
     def detect_deepfake(self, video_path: str) -> str:
         """
-        Blue Team Operation: Detect if video is fake.
+        Blue Team Operation: Detect if video is fake using Gemini.
         """
         if not video_path or not os.path.exists(video_path):
             return json.dumps({"error": "Video path missing or invalid"})
+            
+        # Check for API Key
+        if not os.getenv("GEMINI_API_KEY"):
+            return json.dumps({
+                "error": "Missing GEMINI_API_KEY. Please set it in .env file.", 
+                "verdict": "ERROR"
+            })
 
         print(f"[{self.name}] extracting frames from {video_path}...")
         try:
             frames_dir = os.path.join(os.path.dirname(video_path), "frames")
-            frames = extract_frames(video_path, frames_dir)
+            # Extract fewer frames to save tokens/quota
+            frames_paths = extract_frames(video_path, frames_dir, max_frames=3)
         except Exception as e:
             return json.dumps({"error": f"Frame extraction failed: {str(e)}"})
 
-        print(f"[{self.name}] Analyzing {len(frames)} frames with Vision LLM...")
+        print(f"[{self.name}] Analyzing {len(frames_paths)} frames with Gemini 1.5 Flash...")
         
-        # MOCK LLM CALL (Replace with actual API call)
-        # In a real scenario, we would send base64 encoded images to GPT-4o
-        verdict = self._mock_llm_analysis(frames, video_path)
-        
-        return json.dumps(verdict, indent=2)
+        try:
+            verdict = self._analyze_with_gemini(frames_paths)
+            return json.dumps(verdict, indent=2)
+        except Exception as e:
+             return json.dumps({"error": f"Gemini Analysis failed: {str(e)}", "verdict": "ERROR"})
 
-    def _mock_llm_analysis(self, frames, video_path):
-        # SImulate analysis based on file path content
-        # If "fake" in path, high probability of FAKE
-        is_fake = "fake" in video_path.lower()
+    def _analyze_with_gemini(self, frame_paths):
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
-        # Randomize slightly to simulate "AI"
-        confidence = random.randint(85, 99)
+        # Load images
+        images = []
+        for p in frame_paths:
+            img = PIL.Image.open(p)
+            images.append(img)
+            
+        # Construct Prompt
+        # We import the system prompt or define it inline if import fails
+        try:
+            from DEEPFAKE.detector.prompts import DETECTOR_SYSTEM_PROMPT
+            prompt = DETECTOR_SYSTEM_PROMPT
+        except ImportError:
+            prompt = "Analyze these video frames. Is this video REAL or FAKE? Return JSON with verdict, confidence, and reasoning."
+
+        # Send to API
+        response = model.generate_content([prompt, *images])
         
-        if is_fake:
+        # Parse Response (Gemini returns markdown text, usually with ```json ... ```)
+        text = response.text
+        
+        # Clean up code blocks if present
+        if "```json" in text:
+            text = text.split("```json")[1].split("```")[0]
+        elif "```" in text:
+             text = text.split("```")[1].split("```")[0]
+             
+        try:
+            return json.loads(text.strip())
+        except json.JSONDecodeError:
+            # Fallback if model didn't return valid JSON
             return {
-                "verdict": "FAKE",
-                "confidence": confidence,
-                "artifacts_found": ["Mouth blurring", "Inconsistent lighting on cheek"],
-                "reasoning": "The lip movement does not perfectly match the audio (visual sync issue), and there is a digital artifact near the jawline."
-            }
-        else:
-             return {
-                "verdict": "REAL",
-                "confidence": confidence,
-                "artifacts_found": [],
-                "reasoning": "Natural blinking patterns observed. Skin texture contains natural micro-details. No warping detected."
+                "verdict": "UNKNOWN", 
+                "confidence": 0, 
+                "raw_response": text,
+                "reasoning": "Model returned invalid JSON format."
             }
