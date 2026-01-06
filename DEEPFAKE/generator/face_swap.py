@@ -119,10 +119,19 @@ if __name__ == "__main__":
         
     for source in sources:
         base_name = os.path.splitext(os.path.basename(source))[0]
+        
+        # Determine demographic match
+        if "man" in base_name and "woman" not in base_name:
+            target_video = os.path.join(data_dir, "target_video_man.mp4")
+        elif "woman" in base_name:
+             target_video = os.path.join(data_dir, "target_video_woman.mp4")
+        else:
+             target_video = os.path.join(data_dir, "target_video.mp4") # Fallback
+             
         output = os.path.join(output_dir, f"fake_{base_name}.mp4")
         
         if os.path.exists(target_video):
-            print(f"Processing {base_name}...")
+            print(f"Processing {base_name} -> {os.path.basename(target_video)}...")
             process_face_swap(source, target_video, output)
         else:
-            print(f"Missing target video: {target_video}")
+            print(f"Skipping {base_name}: Missing target ({target_video})")

@@ -98,6 +98,15 @@ class ResearchAgent(Agent):
         try:
             return json.loads(text.strip())
         except json.JSONDecodeError:
+            # Fallback: Try to find the first { and last }
+            import re
+            match = re.search(r'\{.*\}', text, re.DOTALL)
+            if match:
+                try:
+                    return json.loads(match.group(0))
+                except:
+                    pass
+            
             # Fallback if model didn't return valid JSON
             return {
                 "verdict": "UNKNOWN", 
