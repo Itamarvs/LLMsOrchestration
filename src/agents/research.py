@@ -67,7 +67,7 @@ class ResearchAgent(Agent):
              return json.dumps({"error": f"Gemini Analysis failed: {str(e)}", "verdict": "ERROR"})
 
     def _analyze_with_gemini(self, frame_paths):
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-flash-latest')
         
         # Load images
         images = []
