@@ -5,6 +5,7 @@ This project implements a Multi-Agent System for orchestrating LLM workflows, bu
 
 ## Structure
 The project follows a standard Python package structure:
+- `DEEPFAKE/`: **Main Course Project** (Red Team vs Blue Team Demo) - [See README](DEEPFAKE/README.md)
 - `src/`: Source code
     - `agents/`: Agent implementations
     - `utils/`: Helper functions
