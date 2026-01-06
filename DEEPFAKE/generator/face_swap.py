@@ -101,13 +101,28 @@ def process_face_swap(source_path, target_path, output_path):
     print(f"Done. Output: {output_path}")
 
 if __name__ == "__main__":
-    # import argparse
-    # Check paths
-    source = "DEEPFAKE/generator/data/source_face.jpg"
-    target = "DEEPFAKE/generator/data/target_video.mp4"
-    output = "DEEPFAKE/generator/output/fake_video.mp4"
+    import glob
     
-    if os.path.exists(source) and os.path.exists(target):
-         process_face_swap(source, target, output)
-    else:
-        print("Missing data files.")
+    data_dir = "DEEPFAKE/generator/data/"
+    output_dir = "DEEPFAKE/generator/output/"
+    os.makedirs(output_dir, exist_ok=True)
+    
+    target_video = os.path.join(data_dir, "target_video.mp4")
+    
+    # Find all source images (jpg, png)
+    sources = glob.glob(os.path.join(data_dir, "*.png")) + glob.glob(os.path.join(data_dir, "*.jpg"))
+    sources = [s for s in sources if "frame_" not in s and "source_face.jpg" not in s] # Exclude dummy if needed or keep it
+    
+    if not sources:
+        print("No source images found in data/.")
+        sys.exit(1)
+        
+    for source in sources:
+        base_name = os.path.splitext(os.path.basename(source))[0]
+        output = os.path.join(output_dir, f"fake_{base_name}.mp4")
+        
+        if os.path.exists(target_video):
+            print(f"Processing {base_name}...")
+            process_face_swap(source, target_video, output)
+        else:
+            print(f"Missing target video: {target_video}")

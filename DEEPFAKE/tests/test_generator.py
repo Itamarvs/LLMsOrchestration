@@ -16,7 +16,9 @@ class TestDeepfakeGenerator(unittest.TestCase):
         # Ideally, we import the function.
         
         # Checking the file produced by the main run:
-        default_output = "DEEPFAKE/generator/output/fake_video.mp4"
+        # Checking the file produced by the main run:
+        # Since we switched to batch processing, we check one of the expected outputs
+        default_output = "DEEPFAKE/generator/output/fake_real_face_man.mp4"
         self.assertTrue(os.path.exists(default_output), "Output video file created")
         
         # Check if video is valid
