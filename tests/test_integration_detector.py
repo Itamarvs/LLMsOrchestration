@@ -14,12 +14,12 @@ def get_video_files(category_path):
     """Helper to finding all mp4 files in a directory"""
     search_path = os.path.join("tests/data", category_path, "*.mp4")
     files = glob.glob(search_path)
-    # Return absolute paths or relative to cwd
     return files
 
 # Collect test files
 REAL_VIDEOS = get_video_files("real")
 LOW_QUALITY_FAKE_VIDEOS = get_video_files("fake/low_quality")
+MEDIUM_QUALITY_FAKE_VIDEOS = get_video_files("fake/medium_quality")
 HIGH_QUALITY_FAKE_VIDEOS = get_video_files("fake/high_quality")
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def test_detect_real_videos(detector, video_path):
     assert "verdict" in result
     assert "confidence" in result
     
-    # Ideally should be REAL, but we handle uncertainty
+    # Ideally should be REAL
     assert result["verdict"] in ["REAL", "FAKE", "UNKNOWN", "ERROR"]
     if result["verdict"] != "ERROR":
          assert "error" not in result
@@ -49,7 +49,17 @@ def test_detect_low_quality_fakes(detector, video_path):
     result = json.loads(result_json)
     
     assert "verdict" in result
+    # Ideally should be FAKE
+    assert result["verdict"] in ["REAL", "FAKE", "UNKNOWN", "ERROR"]
+
+@pytest.mark.parametrize("video_path", MEDIUM_QUALITY_FAKE_VIDEOS)
+def test_detect_medium_quality_fakes(detector, video_path):
+    """Test all videos in tests/data/fake/medium_quality"""
+    print(f"Testing MEDIUM QUALITY FAKE video: {video_path}")
+    result_json = detector.detect_deepfake(video_path)
+    result = json.loads(result_json)
     
+    assert "verdict" in result
     # Ideally should be FAKE
     assert result["verdict"] in ["REAL", "FAKE", "UNKNOWN", "ERROR"]
 
@@ -68,14 +78,16 @@ def test_detect_high_quality_fakes(detector, video_path):
 
 def test_no_empty_categories():
     """Ensure we have at least one video in each category to test"""
-    # Verify checking paths
     print(f"Real Videos: {REAL_VIDEOS}")
     print(f"Low Quality Fakes: {LOW_QUALITY_FAKE_VIDEOS}")
+    print(f"Medium Quality Fakes: {MEDIUM_QUALITY_FAKE_VIDEOS}")
     print(f"High Quality Fakes: {HIGH_QUALITY_FAKE_VIDEOS}")
 
     if not REAL_VIDEOS:
         pytest.fail("No videos found in tests/data/real/")
     if not LOW_QUALITY_FAKE_VIDEOS:
         pytest.fail("No videos found in tests/data/fake/low_quality/")
+    if not MEDIUM_QUALITY_FAKE_VIDEOS:
+        pytest.fail("No videos found in tests/data/fake/medium_quality/")
     if not HIGH_QUALITY_FAKE_VIDEOS:
         pytest.fail("No videos found in tests/data/fake/high_quality/")
