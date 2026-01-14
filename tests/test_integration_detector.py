@@ -1,7 +1,9 @@
-import pytest
-import os
 import glob
 import json
+import os
+
+import pytest
+
 from deepfake_platform.detector.agent import DeepFakeDetector
 
 # Skip all tests in this module if no API key is present
@@ -32,13 +34,13 @@ def test_detect_real_videos(detector, video_path):
     print(f"Testing REAL video: {video_path}")
     result_json = detector.detect_deepfake(video_path)
     result = json.loads(result_json)
-    
+
     assert "verdict" in result
     assert "confidence" in result
-    
+
     # Enforce STRICT assertion: Real videos must be classified as REAL
     assert result["verdict"] == "REAL", f"Expected REAL, got {result}"
-    
+
     if result["verdict"] != "ERROR":
          assert "error" not in result
 
@@ -48,9 +50,9 @@ def test_detect_low_quality_fakes(detector, video_path):
     print(f"Testing LOW QUALITY FAKE video: {video_path}")
     result_json = detector.detect_deepfake(video_path)
     result = json.loads(result_json)
-    
+
     assert "verdict" in result
-    
+
     # Enforce STRICT assertion: Low quality fakes must be classified as FAKE
     assert result["verdict"] == "FAKE", f"Expected FAKE, got {result}"
 
@@ -60,9 +62,9 @@ def test_detect_medium_quality_fakes(detector, video_path):
     print(f"Testing MEDIUM QUALITY FAKE video: {video_path}")
     result_json = detector.detect_deepfake(video_path)
     result = json.loads(result_json)
-    
+
     assert "verdict" in result
-    
+
     # Enforce STRICT assertion: Medium quality fakes must be classified as FAKE
     assert result["verdict"] == "FAKE", f"Expected FAKE, got {result}"
 
@@ -72,10 +74,10 @@ def test_detect_high_quality_fakes(detector, video_path):
     print(f"Testing HIGH QUALITY FAKE video: {video_path}")
     result_json = detector.detect_deepfake(video_path)
     result = json.loads(result_json)
-    
+
     assert "verdict" in result
     print(f"High Quality Result for {video_path}: {result}")
-    
+
     # Enforce STRICT assertion: High quality fakes must be classified as FAKE
     assert result["verdict"] == "FAKE", f"Expected FAKE, got {result}"
 

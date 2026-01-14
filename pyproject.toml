@@ -40,10 +40,12 @@ where = ["src"]
 [tool.ruff]
 target-version = "py39"
 line-length = 120
-select = ["E", "F", "W", "I", "N", "D", "UP", "B", "C4"]
-ignore = ["D100", "D104"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "D", "UP", "B", "C4"]
+ignore = ["D100", "D104", "D203", "D213", "D401"]
+
+[tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D"]
 
 [tool.bandit]

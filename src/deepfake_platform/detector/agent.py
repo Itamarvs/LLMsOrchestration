@@ -1,14 +1,15 @@
 """DeepFake Detection Agent using Gemini LLM for forensic analysis."""
 
-import os
 import json
 import logging
-import google.generativeai as genai
-from dotenv import load_dotenv
-import PIL.Image
-from typing import Dict, Any, List
-import time
+import os
 import random
+import time
+from typing import Any
+
+import google.generativeai as genai
+import PIL.Image
+from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
@@ -37,29 +38,29 @@ class DeepFakeDetector:
             logger.warning("GEMINI_API_KEY not found in environment variables.")
 
     def detect_deepfake(self, video_path: str) -> str:
-        """
-        Blue Team Operation: Detect if video is fake using Gemini.
+        """Blue Team Operation: Detect if video is fake using Gemini.
 
         Args:
             video_path (str): Path to the video file to analyze.
 
         Returns:
              str: JSON string containing the verdict and confidence.
+
         """
         if not video_path or not os.path.exists(video_path):
             return json.dumps({"error": "Video path missing or invalid"})
-            
+
         # Check for API Key
         if not os.getenv("GEMINI_API_KEY"):
             print("\n[!] GEMINI_API_KEY not found in environment variables.")
             print("    This is required for real analysis.")
             choice = input("    Would you like to run in MOCK MODE instead? (y/n): ").lower().strip()
-            
+
             if choice == 'y':
                 return self._run_mock_analysis(video_path)
             else:
                 return json.dumps({
-                    "error": "Missing GEMINI_API_KEY. Please set it in .env file.", 
+                    "error": "Missing GEMINI_API_KEY. Please set it in .env file.",
                     "verdict": "ERROR"
                 })
 
@@ -72,7 +73,7 @@ class DeepFakeDetector:
             return json.dumps({"error": f"Frame extraction failed: {str(e)}"})
 
         logger.info(f"[{self.name}] Analyzing {len(frames_paths)} frames with Gemini 1.5 Flash...")
-        
+
         try:
             verdict = self._analyze_with_gemini(frames_paths)
             return json.dumps(verdict, indent=2)
@@ -83,13 +84,13 @@ class DeepFakeDetector:
         """Simulates an analysis for demonstration purposes."""
         logger.info(f"[{self.name}] Running MOCK MODE analysis on {video_path}...")
         time.sleep(1.5) # Simulate processing time
-        
+
         # Simple heuristic for mock result based on filename to make it interesting
         if "fake" in video_path.lower():
             result = {
                 "verdict": "FAKE",
                 "confidence": 0.98,
-                "reasoning": "[MOCK MODE] Validated generic visual artifacts consistent with synthetic media generation."
+                "reasoning": "[MOCK MODE] Visual artifacts consistent with synthetic media."
             }
         else:
              result = {
@@ -97,25 +98,28 @@ class DeepFakeDetector:
                 "confidence": 0.95,
                 "reasoning": "[MOCK MODE] No significant anomalies detected in frame consistency or lighting."
             }
-            
+
         return json.dumps(result, indent=2)
 
-    def _analyze_with_gemini(self, frame_paths: List[str]) -> Dict[str, Any]:
+    def _analyze_with_gemini(self, frame_paths: list[str]) -> dict[str, Any]:
         """Internal method to call Gemini API."""
         model = genai.GenerativeModel('gemini-flash-latest')
-        
+
         # Load images
         images = []
         for p in frame_paths:
             img = PIL.Image.open(p)
             images.append(img)
-            
+
         # Construct Prompt
         try:
             from .prompts import DETECTOR_SYSTEM_PROMPT
             prompt = DETECTOR_SYSTEM_PROMPT
         except ImportError:
-            prompt = "Analyze these video frames. Is this video REAL or FAKE? Return JSON with verdict ('REAL' or 'FAKE'), confidence (0-1), and reasoning."
+            prompt = (
+                "Analyze these video frames. Is this video REAL or FAKE? "
+                "Return JSON with verdict ('REAL' or 'FAKE'), confidence (0-1), and reasoning."
+            )
 
         # Send to API with Retry Logic
         return self._retry_with_backoff(
@@ -136,7 +140,7 @@ class DeepFakeDetector:
                     attempt += 1
                     if attempt > max_retries:
                         raise e
-                    
+
                     # Exponential backoff: 2s, 4s, 8s... + jitter
                     wait_time = (2 ** attempt) + random.uniform(0, 1)
                     logger.warning(f"Quota exceeded. Retrying in {wait_time:.2f}s... (Attempt {attempt}/{max_retries})")
@@ -144,17 +148,17 @@ class DeepFakeDetector:
                 else:
                     raise e
 
-    def _parse_gemini_response(self, response) -> Dict[str, Any]:
+    def _parse_gemini_response(self, response) -> dict[str, Any]:
         """Parses the Gemini response object into a dictionary."""
         # Parse Response
         text = response.text
-        
+
         # Clean up code blocks if present
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0]
         elif "```" in text:
                 text = text.split("```")[1].split("```")[0]
-                
+
         try:
             return json.loads(text.strip())
         except json.JSONDecodeError:
@@ -164,12 +168,12 @@ class DeepFakeDetector:
             if match:
                 try:
                     return json.loads(match.group(0))
-                except:
+                except (json.JSONDecodeError, ValueError):
                     pass
-            
+
             return {
-                "verdict": "UNKNOWN", 
-                "confidence": 0, 
+                "verdict": "UNKNOWN",
+                "confidence": 0,
                 "raw_response": text,
                 "reasoning": "Model returned invalid JSON format."
             }

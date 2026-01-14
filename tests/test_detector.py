@@ -1,9 +1,11 @@
 
-import pytest
-from unittest.mock import patch, MagicMock
-import os
 import json
+from unittest.mock import MagicMock, patch
+
+import pytest
+
 from deepfake_platform.detector.agent import DeepFakeDetector
+
 
 @pytest.fixture
 def detector():
@@ -29,20 +31,20 @@ def test_detector_deepfake_mock(detector):
                     mock_getenv.return_value = "fake_key"
                     mock_extract.return_value = ["frame1.jpg"]
                     mock_analyze.return_value = {"verdict": "FAKE", "confidence": 0.9}
-                    
+
                     # Test
                     result = detector.detect_deepfake("dummy.mp4")
                     data = json.loads(result)
-                    
+
                     assert data["verdict"] == "FAKE"
                     assert data["confidence"] == 0.9
 
     """Test fallback when Gemini returns invalid JSON"""
-    with patch("google.generativeai.GenerativeModel") as MockModel:
-        mock_instance = MockModel.return_value
+    with patch("google.generativeai.GenerativeModel") as mock_model:
+        mock_instance = mock_model.return_value
         # Mock a response that isn't JSON
         mock_instance.generate_content.return_value.text = "I think it is fake."
-        
+
         with patch("PIL.Image.open"):
             with patch("deepfake_platform.detector.agent.DETECTOR_SYSTEM_PROMPT", "prompt", create=True):
                  result = detector._analyze_with_gemini(["path/to/img.jpg"])
@@ -60,11 +62,11 @@ def test_retry_on_quota_error(detector):
         Exception("Quota exceeded"),
         MagicMock(text='{"verdict": "REAL", "confidence": 0.95, "reasoning": "Looks real"}')
     ]
-    
+
     # We need to mock time.sleep to avoid waiting during tests
     with patch("time.sleep") as mock_sleep:
         result = detector._retry_with_backoff(mock_func, max_retries=3)
-        
+
         # Should have called the function 3 times (2 fails + 1 success)
         assert mock_func.call_count == 3
         # Should have slept twice
