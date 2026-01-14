@@ -1,3 +1,4 @@
+"""System prompts for the forensic deepfake detection agent."""
 
 DETECTOR_SYSTEM_PROMPT = """
 You are a Principal Forensic Multimedia Analyst specializing in deepfake detection. 

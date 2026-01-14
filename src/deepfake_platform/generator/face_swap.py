@@ -1,3 +1,4 @@
+"""Face swap generator for creating deepfake test videos."""
 
 import cv2
 import numpy as np
@@ -5,6 +6,7 @@ import os
 import sys
 
 def get_face_transform(src_img, face_cascade, eye_cascade):
+    """Extract face region and bounding box from source image."""
     gray = cv2.cvtColor(src_img, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
     if len(faces) == 0:
@@ -17,6 +19,7 @@ def get_face_transform(src_img, face_cascade, eye_cascade):
     return face_roi_color, (x, y, w, h)
 
 def process_face_swap(source_path, target_path, output_path):
+    """Swap face from source image onto faces in target video."""
     print("Starting Face Swap (OpenCV Haar Mode)...")
     
     # Load Cascades

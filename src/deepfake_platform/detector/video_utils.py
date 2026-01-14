@@ -1,3 +1,4 @@
+"""Video processing utilities for frame extraction."""
 
 import cv2
 import os

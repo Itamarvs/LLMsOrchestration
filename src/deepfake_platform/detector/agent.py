@@ -1,3 +1,5 @@
+"""DeepFake Detection Agent using Gemini LLM for forensic analysis."""
+
 import os
 import json
 import logging
@@ -22,7 +24,10 @@ except ImportError:
     pass
 
 class DeepFakeDetector:
+    """Blue Team agent for detecting deepfakes using Gemini LLM analysis."""
+
     def __init__(self):
+        """Initialize the detector with Gemini API configuration."""
         self.name = "BlueTeam-Detector"
         # Configure Gemini
         api_key = os.getenv("GEMINI_API_KEY")
