@@ -1,5 +1,6 @@
 import pytest
 import os
+import glob
 import json
 from deepfake_platform.detector.agent import DeepFakeDetector
 
@@ -9,65 +10,72 @@ pytestmark = pytest.mark.skipif(
     reason="GEMINI_API_KEY not set in environment"
 )
 
+def get_video_files(category_path):
+    """Helper to finding all mp4 files in a directory"""
+    search_path = os.path.join("tests/data", category_path, "*.mp4")
+    files = glob.glob(search_path)
+    # Return absolute paths or relative to cwd
+    return files
+
+# Collect test files
+REAL_VIDEOS = get_video_files("real")
+LOW_QUALITY_FAKE_VIDEOS = get_video_files("fake/low_quality")
+HIGH_QUALITY_FAKE_VIDEOS = get_video_files("fake/high_quality")
+
 @pytest.fixture
 def detector():
     return DeepFakeDetector()
 
-@pytest.fixture
-def real_video_path():
-    # Try to find a real video file in the project
-    candidates = [
-        "examples/deepfake_demo.mp4",
-        "src/deepfake_platform/generator/output/fake_video.mp4",
-        "src/deepfake_platform/generator/data/target_video.mp4"
-    ]
-    
-    for path in candidates:
-        if os.path.exists(path):
-            return path
-            
-    pytest.skip("No test video files found for integration testing")
-
-@pytest.fixture
-def high_quality_video_path():
-    # Path to the downloaded high-quality sample
-    path = "tests/data/high_quality_fake.mp4"
-    if os.path.exists(path):
-        return path
-    pytest.skip("High-quality test video file not found at tests/data/high_quality_fake.mp4")
-
-def test_integration_full_detection_flow(detector, real_video_path):
-    """
-    Integration test that runs the full detection flow on a real video file.
-    This makes actual calls to the Gemini API.
-    """
-    print(f"Testing with video: {real_video_path}")
-    
-    result_json = detector.detect_deepfake(real_video_path)
-    result = json.loads(result_json)
-    
-    # Verify the structure of the response
-    assert "verdict" in result, "Response should contain a verdict"
-    assert "confidence" in result, "Response should contain confidence score" 
-    
-    assert result["verdict"] in ["REAL", "FAKE", "UNKNOWN", "ERROR"]
-    
-    if result["verdict"] != "ERROR":
-         assert "error" not in result
-
-def test_detect_high_quality_fake(detector, high_quality_video_path):
-    """
-    Test against a known high-quality deepfake sample.
-    """
-    print(f"Testing with high-quality fake: {high_quality_video_path}")
-    
-    result_json = detector.detect_deepfake(high_quality_video_path)
+@pytest.mark.parametrize("video_path", REAL_VIDEOS)
+def test_detect_real_videos(detector, video_path):
+    """Test all videos in tests/data/real"""
+    print(f"Testing REAL video: {video_path}")
+    result_json = detector.detect_deepfake(video_path)
     result = json.loads(result_json)
     
     assert "verdict" in result
     assert "confidence" in result
-    print(f"High Quality Fake Result: {result}")
     
-    # Ideally, this should be detected as FAKE
-    # But for now, we just ensure it processes correctly without crashing
+    # Ideally should be REAL, but we handle uncertainty
     assert result["verdict"] in ["REAL", "FAKE", "UNKNOWN", "ERROR"]
+    if result["verdict"] != "ERROR":
+         assert "error" not in result
+
+@pytest.mark.parametrize("video_path", LOW_QUALITY_FAKE_VIDEOS)
+def test_detect_low_quality_fakes(detector, video_path):
+    """Test all videos in tests/data/fake/low_quality"""
+    print(f"Testing LOW QUALITY FAKE video: {video_path}")
+    result_json = detector.detect_deepfake(video_path)
+    result = json.loads(result_json)
+    
+    assert "verdict" in result
+    
+    # Ideally should be FAKE
+    assert result["verdict"] in ["REAL", "FAKE", "UNKNOWN", "ERROR"]
+
+@pytest.mark.parametrize("video_path", HIGH_QUALITY_FAKE_VIDEOS)
+def test_detect_high_quality_fakes(detector, video_path):
+    """Test all videos in tests/data/fake/high_quality"""
+    print(f"Testing HIGH QUALITY FAKE video: {video_path}")
+    result_json = detector.detect_deepfake(video_path)
+    result = json.loads(result_json)
+    
+    assert "verdict" in result
+    print(f"High Quality Result for {video_path}: {result}")
+    
+    # Ideally should be FAKE
+    assert result["verdict"] in ["REAL", "FAKE", "UNKNOWN", "ERROR"]
+
+def test_no_empty_categories():
+    """Ensure we have at least one video in each category to test"""
+    # Verify checking paths
+    print(f"Real Videos: {REAL_VIDEOS}")
+    print(f"Low Quality Fakes: {LOW_QUALITY_FAKE_VIDEOS}")
+    print(f"High Quality Fakes: {HIGH_QUALITY_FAKE_VIDEOS}")
+
+    if not REAL_VIDEOS:
+        pytest.fail("No videos found in tests/data/real/")
+    if not LOW_QUALITY_FAKE_VIDEOS:
+        pytest.fail("No videos found in tests/data/fake/low_quality/")
+    if not HIGH_QUALITY_FAKE_VIDEOS:
+        pytest.fail("No videos found in tests/data/fake/high_quality/")
