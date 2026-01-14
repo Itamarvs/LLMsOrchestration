@@ -58,3 +58,15 @@ graph TD
 3. **Analysis**: `DeepFakeDetector` constructs a prompt with these frames.
 4. **Inference**: Prompt is sent to Gemini 1.5 Flash (via `google-generativeai`).
 5. **Output**: JSON response containing `verdict`, `confidence`, and `reasoning`.
+
+## Concurrency Considerations
+
+This system uses **synchronous, single-threaded execution** by design. The rationale:
+
+| Consideration | Decision |
+|---------------|----------|
+| **API Calls** | Gemini API is called synchronously; parallelization would hit rate limits faster |
+| **Frame Extraction** | OpenCV processes frames sequentially; parallelization offers marginal benefit for 3-5 frames |
+| **Complexity** | Single-threaded code is easier to debug and maintain for this scope |
+
+**Future Enhancement**: If batch video processing is required, `concurrent.futures.ThreadPoolExecutor` could be used for parallel video preprocessing while respecting API rate limits.
