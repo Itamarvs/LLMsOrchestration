@@ -43,6 +43,7 @@ class DeepFakeDetector:
         >>> result = detector.detect_deepfake("video.mp4")
         >>> print(json.loads(result)["verdict"])
         'FAKE'
+
     """
 
     def __init__(self):
