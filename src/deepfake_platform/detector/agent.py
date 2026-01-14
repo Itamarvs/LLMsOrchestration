@@ -25,7 +25,25 @@ except ImportError:
     pass
 
 class DeepFakeDetector:
-    """Blue Team agent for detecting deepfakes using Gemini LLM analysis."""
+    """Blue Team agent for detecting deepfakes using Gemini LLM analysis.
+
+    Building Block Specification:
+        Input Data:
+            - video_path (str): Path to an MP4 video file for analysis.
+
+        Output Data:
+            - JSON string with keys: verdict (REAL/FAKE), confidence (0-1), reasoning.
+
+        Setup Data:
+            - GEMINI_API_KEY: Required environment variable for API access.
+            - Model: gemini-flash-latest (configurable via prompts.py).
+
+    Example:
+        >>> detector = DeepFakeDetector()
+        >>> result = detector.detect_deepfake("video.mp4")
+        >>> print(json.loads(result)["verdict"])
+        'FAKE'
+    """
 
     def __init__(self):
         """Initialize the detector with Gemini API configuration."""
