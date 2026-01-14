@@ -43,6 +43,24 @@ Using Gemini 1.5 Flash:
 | 1,000 | $0.30 |
 | 10,000 | $3.00 |
 
+## API Call Breakdown per Video
+Each video analysis involves:
+1.  **Authentication**: Zero cost (API Key check).
+2.  **Upload**: Images are sent in request payload (base64/binary).
+3.  **Generation**: One call `model.generate_content([prompt, img1, img2, img3])`.
+4.  **Retries**: In case of `429`, cost is only incurred for successful calls.
+
+## ROI Analysis: AI vs Manual Inspection
+
+| Feature | AI System | Human Expert |
+|---------|-----------|--------------|
+| **Speed** | 3-5 seconds/video | 5-10 minutes/video |
+| **Cost** | < $0.001 | $30 - $100/hour |
+| **Scalability** | Unlimited (Parallel) | Limited by staff |
+| **Availability**| 24/7 | Business hours |
+
+**Conclusion**: The automated system provides a **>10,000% cost reduction** and near-instant results compared to manual forensic analysis, making it viable for high-volume content moderation.
+
 ## Rate Limits
 
 | Tier | Requests per Minute | Tokens per Minute |

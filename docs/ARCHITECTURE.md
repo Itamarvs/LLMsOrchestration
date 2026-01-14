@@ -84,3 +84,25 @@ def run_batch_analysis(video_paths: list[str], max_workers: int = 4) -> list[str
 | Batch | `python run_detector.py v1.mp4 v2.mp4 v3.mp4` | ThreadPoolExecutor (4 workers) |
 
 **Rate Limiting**: When using batch mode, the Gemini API's rate limits still apply. The detector includes exponential backoff retry logic to handle `429 Resource Exhausted` errors gracefully.
+
+## Extension System & Modularity
+
+The project is designed for easy extensibility through its Building Block architecture.
+
+### How to Add a New Detector
+To add a new detection method (e.g., Audio Analyst or Metadata Inspector):
+
+1.  **Create Module**: Add a new file in `src/deepfake_platform/detector/` (e.g., `audio_agent.py`).
+2.  **Inherit Interface**: Implement the standard `detect(input_path)` method.
+3.  **Register**: Import and add to the `DeepFakeDetector` aggregation logic.
+
+### Plugin Architecture Concept
+Future versions can implement a formal plugin system:
+```python
+class BaseDetector(ABC):
+    @abstractmethod
+    def analyze(self, media_path: str) -> dict: ...
+
+# New plugins effectively "plug in" to the main agent
+detectors = [VisualDetector(), AudioDetector(), MetadataDetector()]
+```
