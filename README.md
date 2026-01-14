@@ -40,7 +40,7 @@ GEMINI_API_KEY=AIzaSy...YourKeyHere
 ### 4. 🎥 Demo
 Check out the system in action:
 
-https://github.com/user-attachments/assets/deepfake_demo.mp4
+https://github.com/user-attachments/assets/d75ef482-90c7-4c10-bd06-63f8ee1d5597
 
 *(A sample deepfake video is available in `examples/deepfake_demo.mp4`)*
 
