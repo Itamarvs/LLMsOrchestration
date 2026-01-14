@@ -1,4 +1,7 @@
 # Deep Fake Detection with LLM Orchestration
+![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
+![Coverage](https://img.shields.io/badge/coverage-71%25-yellow.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ## Project Overview
 This project is part of the "LLMs Orchestration" course within the Computer Science MSc program. The primary goal is to leverage Large Language Models (LLMs) to detect whether a given video of a person/face is a deep fake or authentic.
@@ -40,6 +43,33 @@ Check out the system in action:
 https://github.com/user-attachments/assets/deepfake_demo.mp4
 
 *(A sample deepfake video is available in `examples/deepfake_demo.mp4`)*
+
+### 📸 CLI Output Screenshots
+
+**Detection Analysis Output:**
+```text
+$ python run_detector.py tests/data/fake/low_quality/fake_video.mp4
+--- Blue Team Operation Initiated ---
+[BlueTeam-Detector] extracting frames from tests/data/fake/low_quality/fake_video.mp4...
+[BlueTeam-Detector] Analyzing 3 frames with Gemini 1.5 Flash...
+
+--- Mission Report ---
+{
+  "verdict": "FAKE",
+  "confidence": 98,
+  "analysis": {
+    "biological_anomalies": [
+      "Irregular blinking patterns detected",
+      "Unnatural skin smoothing (Gaussian blur effect)"
+    ],
+    "physics_anomalies": [
+      "Inconsistent lighting on jawline boundary",
+      "Hair strands do not follow head movement"
+    ],
+    "general_reasoning": "The video exhibits classic deepfake artifacts including..."
+  }
+}
+```
 
 ## 🛠️ Usage
 
