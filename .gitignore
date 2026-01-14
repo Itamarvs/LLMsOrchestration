@@ -46,3 +46,8 @@ software_submission_guidelines.pdf
 # Agent Workflows
 .agent/workflows
 
+
+grader_review_report.md
+
+**/frames/
+*.pdf
