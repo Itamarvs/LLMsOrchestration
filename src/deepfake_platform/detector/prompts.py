@@ -3,10 +3,10 @@
 Building Block Specification:
     Input Data:
         - None (Static configuration string).
-        
+
     Output Data:
         - DETECTOR_SYSTEM_PROMPT (str): The system instruction for the LLM.
-        
+
     Setup Data:
         - None.
 """

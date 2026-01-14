@@ -8,16 +8,16 @@ import numpy as np
 
 def extract_frames(video_path, output_dir, max_frames=5):
     """Extract evenly spaced frames from a video.
-    
+
     Building Block Specification:
         Input Data:
             - video_path (str): Path to the source MP4 video.
             - output_dir (str): Directory to save extracted frames.
             - max_frames (int): Number of frames to extract (default=5).
-            
+
         Output Data:
             - List[str]: Paths to the extracted image files.
-            
+
         Setup Data:
             - None. Uses standard OS and OpenCV libraries.
     """

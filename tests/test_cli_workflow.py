@@ -1,7 +1,8 @@
 
-import subprocess
 import os
+import subprocess
 import sys
+
 
 def test_cli_help():
     """Verify that the CLI help command runs successfully."""
@@ -18,13 +19,13 @@ def test_cli_mock_run():
     """Verify that we can run the detector in a way that doesn't crash."""
     # We use a non-existent file to trigger the 'error' path which is fast and safe
     # Or checking if a real file exists to run against.
-    
+
     video_path = "tests/data/fake/low_quality/fake_video.mp4"
     if os.path.exists(video_path):
         # We assume GEMINI_API_KEY is present or it will fail gracefully/mock
         # But for E2E speed, we might want to just check the error handling if key missing
         pass
-    
+
     result = subprocess.run(
         [sys.executable, "run_detector.py", "non_existent_video.mp4"],
         capture_output=True,

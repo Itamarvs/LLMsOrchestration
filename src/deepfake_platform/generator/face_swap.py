@@ -22,15 +22,15 @@ def get_face_transform(src_img, face_cascade, eye_cascade):
 
 def process_face_swap(source_path, target_path, output_path):
     """Swap face from source image onto faces in target video.
-    
+
     Building Block Specification:
         Input Data:
             - source_path (str): Path to the source face image (JPG/PNG).
             - target_path (str): Path to the target video (MP4).
-            
+
         Output Data:
             - output_path (str): Generates a deepfake video file at this location.
-            
+
         Setup Data:
             - OpenCV Haar Cascades (haarcascade_frontalface_default.xml).
     """
