@@ -61,12 +61,26 @@ graph TD
 
 ## Concurrency Considerations
 
-This system uses **synchronous, single-threaded execution** by design. The rationale:
+This system supports **both synchronous and parallel execution**:
 
-| Consideration | Decision |
-|---------------|----------|
-| **API Calls** | Gemini API is called synchronously; parallelization would hit rate limits faster |
-| **Frame Extraction** | OpenCV processes frames sequentially; parallelization offers marginal benefit for 3-5 frames |
-| **Complexity** | Single-threaded code is easier to debug and maintain for this scope |
+### Single Video Mode (Synchronous)
+For individual video analysis, synchronous execution is used to keep the code simple and avoid unnecessary complexity.
 
-**Future Enhancement**: If batch video processing is required, `concurrent.futures.ThreadPoolExecutor` could be used for parallel video preprocessing while respecting API rate limits.
+### Batch Mode (Parallel)
+For processing multiple videos, `run_detector.py` implements parallel execution using `concurrent.futures.ThreadPoolExecutor`:
+
+```python
+from concurrent.futures import ThreadPoolExecutor
+
+def run_batch_analysis(video_paths: list[str], max_workers: int = 4) -> list[str]:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        results = list(executor.map(agent.detect_deepfake, video_paths))
+    return results
+```
+
+| Mode | Use Case | Implementation |
+|------|----------|----------------|
+| Single | `python run_detector.py video.mp4` | Synchronous |
+| Batch | `python run_detector.py v1.mp4 v2.mp4 v3.mp4` | ThreadPoolExecutor (4 workers) |
+
+**Rate Limiting**: When using batch mode, the Gemini API's rate limits still apply. The detector includes exponential backoff retry logic to handle `429 Resource Exhausted` errors gracefully.
