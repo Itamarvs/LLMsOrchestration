@@ -4,6 +4,10 @@ import os
 import json
 import random
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Import Detector tools
 try:
     from DEEPFAKE.detector.video_utils import extract_frames
@@ -30,7 +34,10 @@ class ResearchAgent(Agent):
 
     def _execute(self, task: str, context: Dict[str, Any]) -> str:
         if "analyze" in task.lower() and "video" in task.lower():
-            return self.detect_deepfake(context.get("video_path"))
+            video_path = context.get("video_path")
+            if not video_path:
+                return "Error: No video_path provided in context."
+            return self.detect_deepfake(str(video_path))
         
         if "analyze" in task.lower():
             return "Sensitivity analysis complete. Parameters optimal."
@@ -39,6 +46,12 @@ class ResearchAgent(Agent):
     def detect_deepfake(self, video_path: str) -> str:
         """
         Blue Team Operation: Detect if video is fake using Gemini.
+
+        Args:
+            video_path (str): Path to the video file to analyze.
+
+        Returns:
+             str: JSON string containing the verdict and confidence.
         """
         if not video_path or not os.path.exists(video_path):
             return json.dumps({"error": "Video path missing or invalid"})
@@ -50,7 +63,7 @@ class ResearchAgent(Agent):
                 "verdict": "ERROR"
             })
 
-        print(f"[{self.name}] extracting frames from {video_path}...")
+        logger.info(f"[{self.name}] extracting frames from {video_path}...")
         try:
             frames_dir = os.path.join(os.path.dirname(video_path), "frames")
             # Extract fewer frames to save tokens/quota
@@ -58,7 +71,7 @@ class ResearchAgent(Agent):
         except Exception as e:
             return json.dumps({"error": f"Frame extraction failed: {str(e)}"})
 
-        print(f"[{self.name}] Analyzing {len(frames_paths)} frames with Gemini 1.5 Flash...")
+        logger.info(f"[{self.name}] Analyzing {len(frames_paths)} frames with Gemini 1.5 Flash...")
         
         try:
             verdict = self._analyze_with_gemini(frames_paths)

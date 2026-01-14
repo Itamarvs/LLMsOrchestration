@@ -9,6 +9,16 @@ class DeveloperAgent(Agent):
         super().__init__(name="DevBot", role="Developer")
 
     def _execute(self, task: str, context: Dict[str, Any]) -> str:
+        """
+        Executes the development task to generate code.
+
+        Args:
+            task (str): The task description.
+            context (Dict[str, Any]): Contextual information.
+
+        Returns:
+            str: Generated code or status message.
+        """
         # Mocking the LLM generation for the "Hello World" scenario
         if "hello world" in task.lower():
             return self._generate_hello_world()

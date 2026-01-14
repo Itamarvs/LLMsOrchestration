@@ -10,6 +10,16 @@ class SelfAssessmentAgent(Agent):
         super().__init__(name="Grader", role="Self-Assessment")
 
     def _execute(self, task: str, context: Dict[str, Any]) -> str:
+        """
+        Executes the self-assessment process.
+
+        Args:
+            task (str): The task description.
+            context (Dict[str, Any]): Contextual information.
+
+        Returns:
+            str: The assessment report.
+        """
         if "assess" in task.lower():
             return self._perform_assessment()
         return "Grader waiting for assessment task."

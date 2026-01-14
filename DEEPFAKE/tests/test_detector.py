@@ -3,7 +3,7 @@ import unittest
 import os
 import shutil
 import json
-from src.agents.research import ResearchAgent
+from llms_orchestration.agents.research import ResearchAgent
 from DEEPFAKE.detector.video_utils import extract_frames
 
 class TestDetectorAgent(unittest.TestCase):

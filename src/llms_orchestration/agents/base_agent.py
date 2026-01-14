@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
-from src.config.prompts import AGENT_PROMPTS
+from typing import Dict, Any, List, Optional
+from llms_orchestration.config.prompts import AGENT_PROMPTS
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Agent(ABC):
     """
@@ -14,13 +17,13 @@ class Agent(ABC):
         self.memory: List[Dict[str, Any]] = []
         self.add_memory(self.system_prompt)
 
-    def perform_task(self, task: str, context: Dict[str, Any] = None) -> str:
+    def perform_task(self, task: str, context: Optional[Dict[str, Any]] = None) -> str:
         """
         Main entry point for an agent to perform a specific task.
         """
-        print(f"[{self.name}] ({self.role}) Starting task: {task}")
+        logger.info(f"[{self.name}] ({self.role}) Starting task: {task}")
         result = self._execute(task, context or {})
-        print(f"[{self.name}] Task completed.")
+        logger.info(f"[{self.name}] Task completed.")
         return result
 
     @abstractmethod

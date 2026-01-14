@@ -18,7 +18,10 @@ dependencies = [
     "seaborn",
     "jupyter",
     "ruff",
-    "bandit"
+    "bandit",
+    "python-dotenv",
+    "google-generativeai",
+    "pillow"
 ]
 
 [project.optional-dependencies]

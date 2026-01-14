@@ -1,65 +1,70 @@
-# LLMs Orchestration Project
+# LLM Orchestration System
 
-## Overview
-This project implements a Multi-Agent System for orchestrating LLM workflows, built as part of the Advanced Agentic Coding course. It is designed to be modular, extensible, and fully automated.
+A multi-agent system designed to orchestrate Large Language Models for software development tasks. This project demonstrates a pipeline where specialized agents (Architect, Developer, QA, etc.) collaborate to build, test, and assess software artifacts.
 
-## Structure
-The project follows a standard Python package structure:
-- `DEEPFAKE/`: **Main Course Project** (Red Team vs Blue Team Demo) - [See README](DEEPFAKE/README.md)
-- `src/`: Source code
-    - `agents/`: Agent implementations
-    - `utils/`: Helper functions
-    - `config/`: Configuration logic
-- `tests/`: Unit and integration tests
-- `docs/`: Documentation
-- `data/`: Input datasets
-- `results/`: Experiment outputs
-- `notebooks/`: Analysis notebooks
+## Features
+- **Multi-Agent Architecture**: Specialized roles for distinct phases of development.
+- **Automated Workflow**: From scaffolding to implementation and verification.
+- **Quality Gates**: Integrated security and linting checks.
+- **Self-Assessment**: Built-in capability to grade its own output.
 
 ## Installation
 
-### Prerequisites
-- Python 3.9+
-- pip
-
-### Steps
-1. Clone the repository:
+1. **Clone the repository**:
    ```bash
-   git clone <repo-url>
+   git clone <repository-url>
    cd LLMsOrchestration
    ```
-2. Create a virtual environment:
+
+2. **Set up a virtual environment**:
    ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
-3. Install dependencies:
+
+3. **Install dependencies**:
    ```bash
    pip install -e .[dev]
    ```
 
+4. **Environment Configuration**:
+   Copy `.env.example` to `.env` and configure your keys (if applicable):
+   ```bash
+   cp .env.example .env
+   # Edit .env with your favorite editor
+   ```
+
 ## Usage
 
-### Running the Orchestrator
+Run the main orchestration script:
+
 ```bash
 python -m llms_orchestration.main
 ```
 
-### Running Tests
-```bash
-pytest tests/
-```
-
-## Configuration
-Copy the `.env.example` to `.env` and fill in your API keys:
-```bash
-cp .env.example .env
-```
-See `config/` for more advanced settings.
+### Components
+- **Architect**: Sets up the folder structure.
+- **Developer**: Writes the actual code (currently mocks a "Hello World").
+- **Code Quality**: Checks for secrets and style violations.
+- **QA**: Runs test suites.
+- **Research**: Analyzes performance.
+- **Self-Assessment**: Grades the final result.
 
 ## Troubleshooting
-- **ModuleNotFoundError**: Ensure you have installed the package in editable mode (`pip install -e .`).
-- **API Errors**: Check that your `.env` file contains valid keys.
 
-## Credits
-Course Instructions by Dr. Yoram Segal.
+- **ModuleNotFoundError**: Ensure you have installed the package with `pip install -e .`.
+- **API Limits**: If connecting to real LLMs, ensure your `.env` has valid keys and you are within rate limits.
+- **Permission Errors**: Ensure the script has write access to the directory to generate files.
+
+## Project Structure
+```
+src/
+└── llms_orchestration/    # Main package
+    ├── agents/            # Specialized agent implementations
+    ├── config/            # Configuration settings
+    ├── utils/             # Helper functions
+    └── main.py            # Entry point
+tests/                     # Test suite
+docs/                      # Documentation
+notebooks/                 # Analysis notebooks
+```
