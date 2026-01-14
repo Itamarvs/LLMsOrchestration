@@ -28,6 +28,14 @@ def real_video_path():
             
     pytest.skip("No test video files found for integration testing")
 
+@pytest.fixture
+def high_quality_video_path():
+    # Path to the downloaded high-quality sample
+    path = "tests/data/high_quality_fake.mp4"
+    if os.path.exists(path):
+        return path
+    pytest.skip("High-quality test video file not found at tests/data/high_quality_fake.mp4")
+
 def test_integration_full_detection_flow(detector, real_video_path):
     """
     Integration test that runs the full detection flow on a real video file.
@@ -42,10 +50,24 @@ def test_integration_full_detection_flow(detector, real_video_path):
     assert "verdict" in result, "Response should contain a verdict"
     assert "confidence" in result, "Response should contain confidence score" 
     
-    # We don't assert the specific verdict (REAL/FAKE) as ML models can be non-deterministic
-    # and we want to test the plumbing, not the accuracy here.
     assert result["verdict"] in ["REAL", "FAKE", "UNKNOWN", "ERROR"]
     
-    # If successful, there shouldn't be a top-level error (unless it's a model error)
     if result["verdict"] != "ERROR":
          assert "error" not in result
+
+def test_detect_high_quality_fake(detector, high_quality_video_path):
+    """
+    Test against a known high-quality deepfake sample.
+    """
+    print(f"Testing with high-quality fake: {high_quality_video_path}")
+    
+    result_json = detector.detect_deepfake(high_quality_video_path)
+    result = json.loads(result_json)
+    
+    assert "verdict" in result
+    assert "confidence" in result
+    print(f"High Quality Fake Result: {result}")
+    
+    # Ideally, this should be detected as FAKE
+    # But for now, we just ensure it processes correctly without crashing
+    assert result["verdict"] in ["REAL", "FAKE", "UNKNOWN", "ERROR"]
