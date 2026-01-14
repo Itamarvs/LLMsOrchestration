@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 import os
 import json
-from detector.agent import DeepFakeDetector
+from deepfake_platform.detector.agent import DeepFakeDetector
 
 @pytest.fixture
 def detector():
@@ -20,7 +20,7 @@ def test_detector_missing_video(detector):
 
 def test_detector_deepfake_mock(detector):
     # Mock extract_frames and _analyze_with_gemini
-    with patch("detector.agent.extract_frames") as mock_extract:
+    with patch("deepfake_platform.detector.agent.extract_frames") as mock_extract:
         with patch.object(detector, "_analyze_with_gemini") as mock_analyze:
             with patch("os.path.exists") as mock_exists:
                 with patch("os.getenv") as mock_getenv:
@@ -45,7 +45,7 @@ def test_analyze_gemini_fallback(detector):
         mock_instance.generate_content.return_value.text = "I think it is fake."
         
         with patch("PIL.Image.open"):
-            with patch("detector.agent.DETECTOR_SYSTEM_PROMPT", "prompt", create=True):
+            with patch("deepfake_platform.detector.agent.DETECTOR_SYSTEM_PROMPT", "prompt", create=True):
                  result = detector._analyze_with_gemini(["path/to/img.jpg"])
                  assert result["verdict"] == "UNKNOWN"
                  assert "invalid JSON" in result["reasoning"]

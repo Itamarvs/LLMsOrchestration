@@ -5,61 +5,56 @@
 ```mermaid
 graph TD
     User((User))
-    Orchestrator[LLM Orchestrator System]
-    LLM[LLM Provider API]
+    Detector[Deepfake Detector System]
+    Generator[Deepfake Generator System]
+    Gemini[Gemini API]
     
-    User -->|Initiates Task| Orchestrator
-    Orchestrator -->|Sends Prompts| LLM
-    LLM -->|Returns Completions| Orchestrator
-    Orchestrator -->|Generates Artifacts| FileSystem[(File System)]
+    User -->|Uploads Video| Detector
+    User -->|Provides Images| Generator
+    Generator -->|Creates Fakes| Detector
+    Detector -->|Sends Frames| Gemini
+    Gemini -->|Returns Analysis| Detector
+    Detector -->|Outputs Verdict| User
 ```
 
 ## Container Diagram
 
 ```mermaid
 graph TD
-    subgraph "Orchestration Layer"
-        Main[Main Entrypoint] -->|Initializes| Agents
+    subgraph "Deepfake Platform"
+        Entry[run_detector.py]
+        
+        subgraph "Blue Team (Detector)"
+            Agent[DeepFakeDetector Agent]
+            Utils[Video Utils]
+            Prompts[System Prompts]
+        end
+        
+        subgraph "Red Team (Generator)"
+            FaceSwap[Face Swap Script]
+            Data[Source Images]
+        end
     end
     
-    subgraph "Agent Layer"
-        Agents --> Architect[ArchitectAgent]
-        Agents --> Developer[DeveloperAgent]
-        Agents --> QA[QAAgent]
-        Agents --> Quality[CodeQualityAgent]
-        Agents --> Research[ResearchAgent]
-        Agents --> Assessor[SelfAssessmentAgent]
-    end
-    
-    subgraph "Infrastructure Layer"
-        Utils[Utilities]
-        Config[Configuration]
-    end
-    
-    Agents -.->|Uses| Utils
-    Agents -.->|Uses| Config
+    Entry --> Agent
+    Agent --> Utils
+    Agent --> Prompts
+    FaceSwap --> Data
 ```
 
-## Class Hierarchy
+## Component Details
 
-### `Agent` (Base Class)
-- **Role**: Abstract base for all specialized agents.
-- **Methods**:
-  - `perform_task(task: str) -> str`: Public interface.
-  - `_execute(task: str, context: Dict) -> str`: Abstract implementation.
-  - `_log(message: str)`: Internal logging.
+### 1. Blue Team: Detector (`src/deepfake_platform/detector`)
+- **`agent.py`**: The core orchestrator. Manages the flow of checking API keys, extracting frames, and calling the LLM.
+- **`video_utils.py`**: Helper functions for OpenCV-based frame extraction.
+- **`prompts.py`**: Contains the forensic persona prompt for Gemini.
 
-### Specialized Agents
-- **`ArchitectAgent`**: Scaffolds project structure.
-- **`DeveloperAgent`**: Generates implementation code.
-- **`CodeQualityAgent`**: runs static analysis (Ruff/Bandit).
-- **`QAAgent`**: Runs unit tests (Pytest).
-- **`ResearchAgent`**: Optimizes and analyzes performance.
-- **`SelfAssessmentAgent`**: Grades the final output.
+### 2. Red Team: Generator (`src/deepfake_platform/generator`)
+- **`face_swap.py`**: A standalone script using OpenCV Haar cascades to swap faces from source images onto target videos.
 
-## API Documentation
-The system currently exposes a CLI entry point:
-```bash
-python -m llms_orchestration.main
-```
-This triggers the sequential execution of all agents defined in the `main()` function.
+## Data Flow
+1. **Input**: User provides a path to an MP4 video.
+2. **Preprocessing**: `Video Utils` extracts N frames from the video.
+3. **Analysis**: `DeepFakeDetector` constructs a prompt with these frames.
+4. **Inference**: Prompt is sent to Gemini 1.5 Flash (via `google-generativeai`).
+5. **Output**: JSON response containing `verdict`, `confidence`, and `reasoning`.

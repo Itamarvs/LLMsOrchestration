@@ -4,7 +4,7 @@ import os
 # Add root to python path
 sys.path.append(os.getcwd())
 
-from detector.agent import DeepFakeDetector
+from deepfake_platform.detector.agent import DeepFakeDetector
 
 def run_blue_team_operation(video_path):
     agent = DeepFakeDetector()

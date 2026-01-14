@@ -21,7 +21,8 @@ dependencies = [
     "bandit",
     "python-dotenv",
     "google-generativeai",
-    "pillow"
+    "pillow",
+    "opencv-python"
 ]
 
 [project.optional-dependencies]

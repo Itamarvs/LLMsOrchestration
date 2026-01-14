@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 # Import Detector tools
 try:
-    from detector.video_utils import extract_frames
+    from .video_utils import extract_frames
 except ImportError:
     pass
 
@@ -77,7 +77,7 @@ class DeepFakeDetector:
             
         # Construct Prompt
         try:
-            from detector.prompts import DETECTOR_SYSTEM_PROMPT
+            from .prompts import DETECTOR_SYSTEM_PROMPT
             prompt = DETECTOR_SYSTEM_PROMPT
         except ImportError:
             prompt = "Analyze these video frames. Is this video REAL or FAKE? Return JSON with verdict ('REAL' or 'FAKE'), confidence (0-1), and reasoning."
