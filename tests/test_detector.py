@@ -19,25 +19,56 @@ def test_detector_missing_video(detector):
     data = json.loads(result)
     assert "error" in data
     assert "missing or invalid" in data["error"]
+    assert data["verdict"] == "ERROR"
+
+
+def test_detector_invalid_format(detector):
+    """Test that invalid video formats are rejected."""
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as f:
+        f.write(b"not a video")
+        invalid_path = f.name
+
+    result = detector.detect_deepfake(invalid_path)
+    data = json.loads(result)
+    assert "error" in data
+    assert "Invalid video format" in data["error"]
+    assert data["verdict"] == "ERROR"
+
+
+def test_detector_empty_video_file(detector):
+    """Test that empty video files are rejected."""
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as f:
+        empty_path = f.name
+        # File is created but empty
+
+    result = detector.detect_deepfake(empty_path)
+    data = json.loads(result)
+    assert "error" in data
+    assert "empty" in data["error"].lower()
+    assert data["verdict"] == "ERROR"
 
 def test_detector_deepfake_mock(detector):
     # Mock extract_frames and _analyze_with_gemini
     with patch("deepfake_platform.detector.agent.extract_frames") as mock_extract:
         with patch.object(detector, "_analyze_with_gemini") as mock_analyze:
             with patch("os.path.exists") as mock_exists:
-                with patch("os.getenv") as mock_getenv:
-                    # Setup mocks
-                    mock_exists.return_value = True
-                    mock_getenv.return_value = "fake_key"
-                    mock_extract.return_value = ["frame1.jpg"]
-                    mock_analyze.return_value = {"verdict": "FAKE", "confidence": 0.9}
+                with patch("os.path.getsize") as mock_getsize:
+                    with patch("os.getenv") as mock_getenv:
+                        # Setup mocks
+                        mock_exists.return_value = True
+                        mock_getsize.return_value = 1000  # Non-zero file size
+                        mock_getenv.return_value = "fake_key"
+                        mock_extract.return_value = ["frame1.jpg"]
+                        mock_analyze.return_value = {"verdict": "FAKE", "confidence": 0.9}
 
-                    # Test
-                    result = detector.detect_deepfake("dummy.mp4")
-                    data = json.loads(result)
+                        # Test
+                        result = detector.detect_deepfake("dummy.mp4")
+                        data = json.loads(result)
 
-                    assert data["verdict"] == "FAKE"
-                    assert data["confidence"] == 0.9
+                        assert data["verdict"] == "FAKE"
+                        assert data["confidence"] == 0.9
 
     """Test fallback when Gemini returns invalid JSON"""
     with patch("google.generativeai.GenerativeModel") as mock_model:
