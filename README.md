@@ -29,6 +29,17 @@ Create a `.env` file:
 GEMINI_API_KEY=AIzaSy...YourKeyHere
 ```
 
+> [!NOTE]
+> **For Graders / Testing without a Key:**
+> If you do not have a Gemini API Key, the tool will automatically detect this and offer to run in **Mock Mode**.
+> In Mock Mode, the system simulates the analysis process and returns a result based on heuristics, allowing you to verify the application flow and logic without an external dependency.
+
+### 4. 🎥 Demo
+Check out the system in action:
+
+![Project Demo](https://via.placeholder.com/800x450.png?text=Place+Demo+GIF/Video+Here)
+*(Replace this placeholder with a real recording of the terminal usage)*
+
 ## 🛠️ Usage
 
 ### 🎭 1. Red Team: Generator

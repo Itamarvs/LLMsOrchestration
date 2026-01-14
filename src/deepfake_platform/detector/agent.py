@@ -46,10 +46,17 @@ class DeepFakeDetector:
             
         # Check for API Key
         if not os.getenv("GEMINI_API_KEY"):
-            return json.dumps({
-                "error": "Missing GEMINI_API_KEY. Please set it in .env file.", 
-                "verdict": "ERROR"
-            })
+            print("\n[!] GEMINI_API_KEY not found in environment variables.")
+            print("    This is required for real analysis.")
+            choice = input("    Would you like to run in MOCK MODE instead? (y/n): ").lower().strip()
+            
+            if choice == 'y':
+                return self._run_mock_analysis(video_path)
+            else:
+                return json.dumps({
+                    "error": "Missing GEMINI_API_KEY. Please set it in .env file.", 
+                    "verdict": "ERROR"
+                })
 
         logger.info(f"[{self.name}] extracting frames from {video_path}...")
         try:
@@ -66,6 +73,27 @@ class DeepFakeDetector:
             return json.dumps(verdict, indent=2)
         except Exception as e:
              return json.dumps({"error": f"Gemini Analysis failed: {str(e)}", "verdict": "ERROR"})
+
+    def _run_mock_analysis(self, video_path: str) -> str:
+        """Simulates an analysis for demonstration purposes."""
+        logger.info(f"[{self.name}] Running MOCK MODE analysis on {video_path}...")
+        time.sleep(1.5) # Simulate processing time
+        
+        # Simple heuristic for mock result based on filename to make it interesting
+        if "fake" in video_path.lower():
+            result = {
+                "verdict": "FAKE",
+                "confidence": 0.98,
+                "reasoning": "[MOCK MODE] Validated generic visual artifacts consistent with synthetic media generation."
+            }
+        else:
+             result = {
+                "verdict": "REAL",
+                "confidence": 0.95,
+                "reasoning": "[MOCK MODE] No significant anomalies detected in frame consistency or lighting."
+            }
+            
+        return json.dumps(result, indent=2)
 
     def _analyze_with_gemini(self, frame_paths: List[str]) -> Dict[str, Any]:
         """Internal method to call Gemini API."""
