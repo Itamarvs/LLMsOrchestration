@@ -173,8 +173,8 @@ class DeepFakeDetector:
                     if attempt > max_retries:
                         raise e
 
-                    # Exponential backoff: 2s, 4s, 8s... + jitter
-                    wait_time = (2 ** attempt) + random.uniform(0, 1)
+                    # Exponential backoff: 2s, 4s, 8s... + jitter (non-crypto use)
+                    wait_time = (2 ** attempt) + random.uniform(0, 1)  # nosec B311
                     logger.warning(f"Quota exceeded. Retrying in {wait_time:.2f}s... (Attempt {attempt}/{max_retries})")
                     time.sleep(wait_time)
                 else:
