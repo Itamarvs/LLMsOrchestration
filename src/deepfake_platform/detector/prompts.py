@@ -1,4 +1,15 @@
-"""System prompts for the forensic deepfake detection agent."""
+"""System prompts for the forensic deepfake detection agent.
+
+Building Block Specification:
+    Input Data:
+        - None (Static configuration string).
+        
+    Output Data:
+        - DETECTOR_SYSTEM_PROMPT (str): The system instruction for the LLM.
+        
+    Setup Data:
+        - None.
+"""
 
 DETECTOR_SYSTEM_PROMPT = """
 You are a Principal Forensic Multimedia Analyst specializing in deepfake detection.

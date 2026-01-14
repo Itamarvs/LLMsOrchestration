@@ -22,7 +22,9 @@ dependencies = [
     "python-dotenv",
     "google-generativeai",
     "pillow",
-    "opencv-python"
+    "opencv-python",
+    "scipy",
+    "statsmodels"
 ]
 
 [project.optional-dependencies]
