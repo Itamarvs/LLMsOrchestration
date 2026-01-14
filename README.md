@@ -37,8 +37,9 @@ GEMINI_API_KEY=AIzaSy...YourKeyHere
 ### 4. 🎥 Demo
 Check out the system in action:
 
-![Project Demo](https://via.placeholder.com/800x450.png?text=Place+Demo+GIF/Video+Here)
-*(Replace this placeholder with a real recording of the terminal usage)*
+https://github.com/user-attachments/assets/deepfake_demo.mp4
+
+*(A sample deepfake video is available in `examples/deepfake_demo.mp4`)*
 
 ## 🛠️ Usage
 
