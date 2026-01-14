@@ -53,11 +53,18 @@ Creates deepfakes by swapping source faces onto target people.
 
 ### 🛡️ 2. Blue Team: Detector
 Analyzes a video file to detect if it is REAL or FAKE.
-*   **Command**:
-    ```bash
-    python run_detector.py <path_to_video>
-    ```
-*   **Example**:
-    ```bash
-    python run_detector.py src/deepfake_platform/generator/output/fake_real_face_man.mp4
-    ```
+
+**Single Video:**
+```bash
+python run_detector.py <path_to_video>
+```
+
+**Batch Mode (Parallel):**
+```bash
+python run_detector.py video1.mp4 video2.mp4 video3.mp4
+```
+
+**Example:**
+```bash
+python run_detector.py src/deepfake_platform/generator/output/fake_real_face_man.mp4
+```
