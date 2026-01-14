@@ -5,6 +5,8 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 import PIL.Image
 from typing import Dict, Any, List
+import time
+import random
 
 # Load environment variables
 load_dotenv()
@@ -82,9 +84,35 @@ class DeepFakeDetector:
         except ImportError:
             prompt = "Analyze these video frames. Is this video REAL or FAKE? Return JSON with verdict ('REAL' or 'FAKE'), confidence (0-1), and reasoning."
 
-        # Send to API
-        response = model.generate_content([prompt, *images])
-        
+        # Send to API with Retry Logic
+        return self._retry_with_backoff(
+            lambda: model.generate_content([prompt, *images]),
+            max_retries=3
+        )
+
+    def _retry_with_backoff(self, func, max_retries=3):
+        """Helper to retry a function on 429 errors with exponential backoff."""
+        attempt = 0
+        while attempt <= max_retries:
+            try:
+                response = func()
+                return self._parse_gemini_response(response)
+            except Exception as e:
+                error_msg = str(e).lower()
+                if "429" in error_msg or "quota" in error_msg or "resource exhausted" in error_msg:
+                    attempt += 1
+                    if attempt > max_retries:
+                        raise e
+                    
+                    # Exponential backoff: 2s, 4s, 8s... + jitter
+                    wait_time = (2 ** attempt) + random.uniform(0, 1)
+                    logger.warning(f"Quota exceeded. Retrying in {wait_time:.2f}s... (Attempt {attempt}/{max_retries})")
+                    time.sleep(wait_time)
+                else:
+                    raise e
+
+    def _parse_gemini_response(self, response) -> Dict[str, Any]:
+        """Parses the Gemini response object into a dictionary."""
         # Parse Response
         text = response.text
         
@@ -92,8 +120,8 @@ class DeepFakeDetector:
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0]
         elif "```" in text:
-             text = text.split("```")[1].split("```")[0]
-             
+                text = text.split("```")[1].split("```")[0]
+                
         try:
             return json.loads(text.strip())
         except json.JSONDecodeError:

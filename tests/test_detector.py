@@ -37,7 +37,6 @@ def test_detector_deepfake_mock(detector):
                     assert data["verdict"] == "FAKE"
                     assert data["confidence"] == 0.9
 
-def test_analyze_gemini_fallback(detector):
     """Test fallback when Gemini returns invalid JSON"""
     with patch("google.generativeai.GenerativeModel") as MockModel:
         mock_instance = MockModel.return_value
@@ -47,5 +46,29 @@ def test_analyze_gemini_fallback(detector):
         with patch("PIL.Image.open"):
             with patch("deepfake_platform.detector.agent.DETECTOR_SYSTEM_PROMPT", "prompt", create=True):
                  result = detector._analyze_with_gemini(["path/to/img.jpg"])
+                 # The result is parsed from the response object, so we check the result of _analyze_with_gemini
+                 # which calls _retry_with_backoff, which calls _parse_gemini_response
                  assert result["verdict"] == "UNKNOWN"
                  assert "invalid JSON" in result["reasoning"]
+
+def test_retry_on_quota_error(detector):
+    """Test that the detector retries on 429 errors."""
+    mock_func = MagicMock()
+    # Side effects: Fail twice with 429, then succeed
+    mock_func.side_effect = [
+        Exception("429 Resource exhausted"),
+        Exception("Quota exceeded"),
+        MagicMock(text='{"verdict": "REAL", "confidence": 0.95, "reasoning": "Looks real"}')
+    ]
+    
+    # We need to mock time.sleep to avoid waiting during tests
+    with patch("time.sleep") as mock_sleep:
+        result = detector._retry_with_backoff(mock_func, max_retries=3)
+        
+        # Should have called the function 3 times (2 fails + 1 success)
+        assert mock_func.call_count == 3
+        # Should have slept twice
+        assert mock_sleep.call_count == 2
+        # Result should be parsed correctly
+        assert result["verdict"] == "REAL"
+        assert result["confidence"] == 0.95
