@@ -155,7 +155,7 @@ class DeepFakeDetector:
 
         # Send to API with Retry Logic
         return self._retry_with_backoff(
-            lambda: model.generate_content([prompt, *images]),
+            lambda: model.generate_content([prompt, *images]),  # type: ignore[arg-type]
             max_retries=3
         )
 
