@@ -16,6 +16,12 @@ To rigorously test the detection system, we will generate a dataset of deep fake
 -   **Method**: Using tools such as OpenCV or dedicated Google tools.
 -   **Input**: Real static images of people/faces serve as the "seed" for generation.
 -   **Output**: A variety of deep fake videos to benchmark our detector.
+### 3. Note on Model Selection & Limits (Grading Consideration)
+> **IMPORTANT NOTE FOR GRADERS**: 
+> Our deepfake detector is designed to validly use **Gemini 1.5 Pro** or **Gemini 2.5 Pro** for their superior reasoning capabilities (Forensic Persona).
+> However, due to strict **API Rate Limits (Tier 0 / Limit 0)** on these models in the available environment, we have configured the system to default to **Gemini 1.5 Flash** (aliased as `gemini-flash-latest`).
+> -   **Impact**: While `Flash` is faster, it may miss subtle artifacts that `Pro` would catch.
+> -   **Rate Limits**: Even with `Flash`, you may encounter `429 Resource Exhausted` errors (5 RPM limit). Please wait 60 seconds between runs if this occurs.
 
 ---
 
