@@ -65,8 +65,21 @@ class DeepFakeDetector:
              str: JSON string containing the verdict and confidence.
 
         """
+        # Validate video path exists
         if not video_path or not os.path.exists(video_path):
-            return json.dumps({"error": "Video path missing or invalid"})
+            return json.dumps({"error": "Video path missing or invalid", "verdict": "ERROR"})
+
+        # Validate video file extension
+        valid_extensions = ('.mp4', '.avi', '.mov', '.mkv', '.webm')
+        if not video_path.lower().endswith(valid_extensions):
+            return json.dumps({
+                "error": f"Invalid video format. Supported: {valid_extensions}",
+                "verdict": "ERROR"
+            })
+
+        # Validate file is not empty
+        if os.path.getsize(video_path) == 0:
+            return json.dumps({"error": "Video file is empty", "verdict": "ERROR"})
 
         # Check for API Key
         if not os.getenv("GEMINI_API_KEY"):
